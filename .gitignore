@@ -1,5 +1,6 @@
 *~
 *.swp
 .DS_Store
-comedyTrain.db
-simulated_data.train
+*.db
+simulated_data.*
+*.pickle

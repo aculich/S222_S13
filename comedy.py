@@ -8,9 +8,9 @@ import os.path
 import sqlite3
 import sys
 import getopt
+import gzip
 
 import numpy
-from scipy.sparse.csgraph
 
 import gdata.youtube
 import gdata.youtube.service
@@ -31,12 +31,12 @@ def normalize(a, b, key):
 
 def convert_comedy_comparisons(conn):
     subdir = 'comedy_comparisons'
-    test_file = 'comedy_comparisons.test'
-    train_file = 'comedy_comparisons.train'
+    test_file = 'comedy_comparisons.test.gz'
+    train_file = 'comedy_comparisons.train.gz'
     test_data = os.path.join(datadir, subdir, test_file)
     train_data = os.path.join(datadir, subdir, train_file)
     data = None
-    with open(train_data, 'r') as csvfile:
+    with gzip.open(train_data, 'r') as csvfile:
         data = csv.reader(csvfile, delimiter=',')
 
         debug("Sample data from csv file")

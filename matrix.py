@@ -23,13 +23,13 @@ from matplotlib import pyplot, patches
 datadir = 'Data'
 
 def normalize(a, b, key):
-	if key == 'left':
-		return [a,b]
-	else:
-		return [b,a]
+        if key == 'left':
+                return [a,b]
+        else:
+                return [b,a]
 
 def clean(s,x=3):
-	return str(s)[x:-x]
+        return str(s)[x:-x]
 
 def unique_pair_matrix(conn):
         c = conn.cursor()
@@ -58,28 +58,28 @@ def unique_pair_matrix(conn):
 
 
 def initialize_comedy_data(conn):
-	subdir = 'comedy_comparisons'
-	test_file = 'comedy_comparisons.train'
-	test_data = os.path.join(datadir, subdir, test_file)
-	data = None
-	with open(test_data, 'r') as csvfile: #
-	#using with it knows to close it
-		data = csv.reader(csvfile, delimiter=',')
+        subdir = 'comedy_comparisons'
+        test_file = 'comedy_comparisons.train'
+        test_data = os.path.join(datadir, subdir, test_file)
+        data = None
+        with open(test_data, 'r') as csvfile: #
+        #using with it knows to close it
+                data = csv.reader(csvfile, delimiter=',')
 
                 info("Converting csv data into sqlite3...")
-		c = conn.cursor()
-		# c.execute('''WRITE SOME SQL TO DO SOMETHING''')
-		c.execute("""
-			CREATE TABLE com (
-				id1 var(11),
-				id2 var(11),
-				bool TEXT)
-				""")
-		for row in data:
-			c.execute("INSERT INTO com (id1, id2) VALUES (?,?)", normalize(*row))
-		conn.commit()
-				#conn.close()
-				#Close the connection
+                c = conn.cursor()
+                # c.execute('''WRITE SOME SQL TO DO SOMETHING''')
+                c.execute("""
+                        CREATE TABLE com (
+                                id1 var(11),
+                                id2 var(11),
+                                bool TEXT)
+                                """)
+                for row in data:
+                        c.execute("INSERT INTO com (id1, id2) VALUES (?,?)", normalize(*row))
+                conn.commit()
+                                #conn.close()
+                                #Close the connection
 
 def draw_adjacency_matrix(G, node_order=None, partitions=[], colors=[]):
     """
@@ -141,4 +141,4 @@ def main():
         print ntake(20,A)
 
 if __name__ =="__main__":
-	main()
+        main()

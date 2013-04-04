@@ -139,6 +139,6 @@ def main():
                                 pickle.dump(A, f)
 
         print ntake(20,A)
-                
+
 if __name__ =="__main__":
 	main()

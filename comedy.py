@@ -8,7 +8,6 @@ import os.path
 import sqlite3
 import sys
 import getopt
-import gzip
 
 import numpy
 
@@ -35,7 +34,7 @@ def convert_comedy_comparisons(conn):
     test_data = os.path.join(datadir, test_file)
     train_data = os.path.join(datadir, train_file)
     data = None
-    with gzip.open(train_data, 'r') as csvfile:
+    with open(train_data, 'r') as csvfile:
         data = csv.reader(csvfile, delimiter=',')
 
         debug("Sample data from csv file")

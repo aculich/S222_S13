@@ -4,3 +4,4 @@
 *.db
 simulated_data.*
 *.pickle
+/Data/

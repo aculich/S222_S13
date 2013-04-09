@@ -58,9 +58,8 @@ def unique_pair_matrix(conn):
 
 
 def initialize_comedy_data(conn):
-        subdir = 'comedy_comparisons'
         test_file = 'comedy_comparisons.train'
-        test_data = os.path.join(datadir, subdir, test_file)
+        test_data = os.path.join(datadir, test_file)
         data = None
         with open(test_data, 'r') as csvfile: #
         #using with it knows to close it

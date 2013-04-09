@@ -30,11 +30,10 @@ def normalize(a, b, key):
         return [b,a]
 
 def convert_comedy_comparisons(conn):
-    subdir = 'comedy_comparisons'
     test_file = 'comedy_comparisons.test.gz'
     train_file = 'comedy_comparisons.train.gz'
-    test_data = os.path.join(datadir, subdir, test_file)
-    train_data = os.path.join(datadir, subdir, train_file)
+    test_data = os.path.join(datadir, test_file)
+    train_data = os.path.join(datadir, train_file)
     data = None
     with gzip.open(train_data, 'r') as csvfile:
         data = csv.reader(csvfile, delimiter=',')

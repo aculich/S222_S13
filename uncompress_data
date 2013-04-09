@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# This script should be run the first time the repository is cloned or
+# any time new gzipped data is added so that you can operate directly
+# on the data without having to explicitly import gzip libraries in
+# python
+
+cd CompressedData
+mkdir ../Data
+for i in *gz; do
+    gunzip -c $i > ../Data/${i/.gz/}
+done

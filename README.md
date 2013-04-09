@@ -13,3 +13,8 @@ https://developers.google.com/youtube/1.0/developers_guide_python
 
 And stores the data in a sqlite3 database (simpler for the moment than
 using MySQL).
+
+NOTE: The first time you clone the repository you will need to
+generate the Data directory populated with the uncompressed data using this script:
+
+    ./uncompress_data

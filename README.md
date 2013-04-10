@@ -18,3 +18,5 @@ NOTE: The first time you clone the repository you will need to
 generate the Data directory populated with the uncompressed data using this script:
 
     ./uncompress_data
+    
+    minor edit

@@ -1,0 +1,65 @@
+Description of the data and comedy slam
+       Obtained from UCI ML repository
+       ordered pairs of video IDs with a bit saying whether the left or right was found funnier
+       left/right was randomized in presenting videos to raters
+   Training data and Test data given separately
+
+Goal: predict winner from metadata.
+
+Tools: IPython, Github
+   numpy, scipy, matplotlib, nltk, scikit-learn
+
+Descriptive statistics of the data:
+   # records
+   # distinct videos
+   # distinct video pairs
+   # distinct ordered pairs of videos
+   % right winners; statistical significance of the "bias"
+   discordance between which video won in distinct ordered pairs--Bayes accuracy for training data
+   for individual videos, can think of directed graph of "funnier than".  Summarize by PageRank.
+       Not quite the real problem: unit of analysis in the real problem is an ordered pair of videos
+
+Acquiring metadata using video IDs--YouTube APIs
+   speedbumps: had to throttle the requests
+   stored "snapshot" data as pickled Python dict
+
+Techniques for prediction using metadata
+   used mutual information used to screen potential features
+   #views, rating, #raters--logistic regression from these features not very informative
+   comments:
+       issues with comments:
+            inconsistent spellings (hillarous, ...).
+                Tried to use Norvig's spelling corrector, ported to AWS. Not accurate on this corpus
+                   Examples: youtube --> couture
+
+            used nltk Porter stemmer, but not very accurate
+                   Examples: (TO DO)
+
+            text-speak:  LOL, LOLOLOL, HAHA, HAHAHAH, FOFL, ROFL, LMAO
+                 Used RegExp to standardize these
+
+            emoticons: used RegExps to replace happy faces (e.g., :-]) with "happyFace" before
+                 stripping other punctuation
+
+        Ultimately used comments as "two bags of bags of words"  (each comment is a bag)
+
+        Features derived from the bags of bags: presence of a word in any comment, frequency of
+                 comments with a given word, relative frequency, #comments with word,
+                 logOdds, etc.
+
+        Derived feature: PageRank predicted by linear regression, using (among other things)
+              arctan(difference in LOL counts).
+
+    Classifiers: logistic regression, CART
+
+Performance of the two classifiers on the training data
+
+The Test data
+   Accuracy of the Bayes classifier: ????
+   Left/right bias in the test set
+
+Final results: performance of our two predictors on test data
+
+Conclusions about the problem and the data
+
+Meta-conclusions (lessons learned) about the environment and tools (github, IPython, etc.)

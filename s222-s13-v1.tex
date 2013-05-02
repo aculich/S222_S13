@@ -1,4 +1,4 @@
-% last edited 5/1/2013 3:55 by PBS
+% last edited 5/1/2013 10:55 by PBS
 % -*-Mode: LaTeX;-*-
 
 %\documentclass[fleqn,handout]{beamer}
@@ -82,7 +82,7 @@
 
 	\begin{itemize}
 	   \item from UCI ML Repository; donated by Google employee
-	   \item a trial is an ordered pair of video IDs
+	   \item a trial is an ordered pair of video IDs $(v_i, v_j)$
 	   \item data: ordered pair $+$``left'' or ``right'' found funnier by viewer
 	   \item order of the pair in each trial was random
 	   \item repository has training data and test data
@@ -116,9 +116,9 @@
 \frametitle{Descriptive statistics of training data}
       \begin{itemize}
          \item 912,969 records
-         \item 18,474 distinct videos
-         \item 267,211 distinct video pairs
-         \item 359,874 distinct ordered pairs of videos
+         \item 18,474 distinct video IDs
+         \item 267,211 distinct video ID pairs
+         \item 359,874 distinct ordered pairs of video IDs
          \item right video won 51.77\% of the time. $P$-value: nil
          \item judgments often discordant: \\
                   e.g., '-iuk0PbfaHY wDx28Y2RcCI' left and right each ``funnier'' 119~times
@@ -133,7 +133,7 @@
 \begin{frame}
 \frametitle{PageRank}
       \begin{itemize}
-         \item Assign each video (node) in the graph a numerical value
+         \item Assign each video ID (node) in the graph a numerical value
          between $0$ to $1$, known as its \textsl{PageRank}.
          \begin{center}
          \begin{tabular}{| l |}
@@ -180,7 +180,8 @@
 		\item Correct Spelling: tried Norvig's spelling corrector, ported to AWS. \\
 		(e.g.: ``speling"  $\rightarrow$ ``spelling")\\
                 drawback: not accurate on this corpus\\
-                  (e.g.: ``youtube'' $\rightarrow$ ``couture'', ``lol'' $\rightarrow$ ``ll'', ``haha'' $\rightarrow$ ``hata'')
+                  (e.g.: ``youtube'' $\rightarrow$ ``couture'', 
+                    ``lol'' $\rightarrow$ ``ll'', ``haha'' $\rightarrow$ ``hata'')
                    \item Text-speak:  used RegExp to standardize words\\
 		\begin{center}
         			\begin{tabular}{ | l | l |}
@@ -206,7 +207,7 @@
 \begin{frame}
 \frametitle{Bags of Bags of Words}
      \begin{itemize}
-         \item ordered pair of videos reduced to two ``bags of bags of words''  \\
+         \item ordered pair of videos $(v_1, v_2)$ reduced to two ``bags of bags of words''  \\
                   each comment is a bag, each video has a bag of bags
 
          \item features derived from bags of bags:
@@ -244,25 +245,21 @@
 
       \begin{beamerboxesrounded}{Log Bayes Factors}     
       \begin{enumerate}\vspace{2mm}
-      \item determine whether each video won more than it lost, or vice versa.\\
-               videos that won more than lost are ``winners''\\
-               videos that lost more than won are ``losers''\vspace{2mm}
+      \item determine whether video $v_i$ won more than it lost, or vice versa.\\
+               if $v_i$ won more than lost, it's a ``winner''\\
+               if $v_i$ lost more than won, it's a``loser''
+               \vspace{2mm}
       \item for each word $w$, find: \\
               $\mathbb{P}_1(\mathnormal{w})$ 
              = percentage of winner comments that contain $w$\\
              $\mathbb{P}_0(\mathnormal{w})$ = 
-<<<<<<< HEAD
-             percentage of occurrence among the losing ids' comments.\vspace{2mm}
-      \item calculate the log Bayes factor = $\mathnormal{\log}(\frac{\mathbb{P}(winner | comments)}{\mathbb{P}(loser | comments)}) $ for each video id: \vspace{3mm}
-=======
-             percentage of loser comments that contain $w$.\vspace{2mm}
-      \item calculate $logOdds = \mathnormal{\log}(\frac{\mathbb{P}(winner | comments)}{\mathbb{P}(loser | comments)}) $ for each video id: \vspace{3mm}
->>>>>>> updating Bayes section
-      
-$logOdds=\sum_{\mathnormal{w}  \in features} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
+               percentage of loser comments that contain $w$\\
+               (pad to avoid zeros)\vspace{2mm}
+      \item derive new feature: \\      
+$logOdds(v) =\sum_{\mathnormal{w}} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
 
-$\mathnormal{n}$: number of comments in the video \\
-$\mathnormal{m_w}$: number of comments containing $\mathnormal{w}.$  \vspace{3mm}
+$\mathnormal{n}$: number of comments on video $v$\\
+$\mathnormal{m_w}$: number of comments on video $v$ containing $\mathnormal{w}.$  \vspace{3mm}
 %\end{equation}
       \end{enumerate}
     \end{beamerboxesrounded}

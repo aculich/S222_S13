@@ -1,0 +1,233 @@
+% last edited 4/30/2013 3:55 by PBS
+% -*-Mode: LaTeX;-*-
+
+%\documentclass[fleqn,handout]{beamer}
+\documentclass[fleqn]{beamer}
+\mode<presentation>
+{
+  \usetheme{Singapore} % clean!
+  \usecolortheme{orchid}
+\setbeamercolor{umbcboxes}{bg=violet!15,fg=black}
+%\usetheme{Goettingen}
+%  \usetheme{Pittsburgh} % simple, but right flush titles
+%  \usetheme{Copenhagen}
+%  \usetheme{PaloAlto}
+%  \usetheme{Rochester} % very simple, no headings
+%  \usetheme{Berkeley} % ugly square items
+  \setbeamercovered{transparent}  % or whatever (possibly just delete it)
+}
+
+\setbeamertemplate{caption}[numbered]
+\setbeamerfont{caption}{size=\tiny}
+
+% If you wish to uncover everything in a step-wise fashion, uncomment
+% the following command:
+
+%\beamerdefaultoverlayspecification{<+->}
+\usepackage{amsmath}
+\usepackage{comment}
+%\usepackage{caption}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{url}
+
+\parskip 0.66ex
+
+
+\begin{document}
+
+\title[] % (optional, use only with long paper titles)
+{Predicting YouTube Comedy Slam Winners}
+
+%\author[Author, Another] % (optional, use only with lots of authors)
+\author{Statistics 222 Class of 2013}
+\institute{{\small Department of Statistics\\University of California, Berkeley}}
+
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+%\author[Author, Another] % (optional, use only with lots of authors)
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+% \date % [Short Occasion] % (optional)
+\date{7 May 2013 }
+\subject{Statistical Machine Learning}
+
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Outline}
+%{\small
+%\tableofcontents
+%}
+% %  % You might wish to add the option [pausesections]
+%\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{YouTube Comedy Slam Data}
+
+	\begin{itemize}
+	   \item from UCI ML Repository
+	   \item a trial is an ordered pair of video IDs
+	   \item data: ordered pair $+$``left'' or ``right'' found funnier by viewer
+	   \item order of the pair in each trial was random
+	   \item repository has training data and test data
+	\end{itemize}
+
+	\begin{beamerboxesrounded}{Goal}
+	    Predict which video in a pair will be funnier, from metadata
+	\end{beamerboxesrounded}
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Tools}
+   \begin{itemize}
+        \item Github
+        \item IPython notebook
+        \item numpy, scipy, matplotlib, nltk, scikit-learn
+   \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Descriptive statistics of training data}
+      \begin{itemize}
+         \item ??? records
+         \item ??? distinct videos
+         \item ??? distinct video pairs
+         \item ??? distinct ordered pairs of videos
+         \item right video won ??? \% of the time. $P$-value: ???
+         \item viewers often discordant: EXAMPLE
+         \item accuracy of Bayes classifier for training data: ??? \%
+         \item for individual videos, directed graph of ``funnier than''
+         \item can summarize that graph by PageRank
+     \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Acquiring metadata}
+   \begin{itemize}
+       \item queried YouTube with video IDs using Google APIs w/i Python
+       \item speedbumps: had to throttle the requests
+       \item stored ``snapshot'' data as pickled Python dict
+   \end{itemize}
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Prediction using metadata: Feature selection}
+      \begin{itemize}
+          \item used mutual information to screen potential features
+          \item quantitative metadata (e.g., \#views, rating, \#raters) unhelpful
+          \item comments more promising
+      \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Issues with comments}
+    \begin{itemize}
+        \item inconsistent spellings (hillarous, \textellipsis)\\
+                Tried Norvig's spelling corrector, ported to AWS. \\
+                Not accurate on this corpus\\
+                  (examples: ``youtube'' $\rightarrow$ ``couture'' ADD MORE)
+
+        \item used nltk Porter stemmer, but not very accurate\\
+                   Examples: (TO DO)
+
+        \item text-speak:  LOL, LOLOLOL, HAHA, HAHAHAH, FOFL, ROFL, LMAO\\
+                 Used RegExp to standardize these
+
+        \item emoticons: used RegExps to replace happy faces (e.g., ``:-]'') with ``happyFace'' 
+                  before stripping other punctuation
+
+    \end{itemize}
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Bags of Bags of Words}
+     \begin{itemize}
+         \item ordered pair of videos reduced to two ``bags of bags of words''  \\
+                  each comment is a bag, each video has a bag of bags
+
+         \item features derived from bags of bags:
+             \begin{itemize}
+                 \item presence of a word in any comment
+                 \item frequency of comments with a given word
+                 \item relative frequency of comments with a given word
+                 \item  logOdds of frequencies and relative frequencies
+                 \item etc.
+              \end{itemize}
+         
+         \item another derived feature: PageRank predicted by linear regression\\ 
+                  predictor used (among other things) $\arctan$(difference in LOL counts)
+     
+     \end{itemize}
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Classifiers}
+
+     \begin{beamerboxesrounded}{Logistic regression}
+         Explain
+     \end{beamerboxesrounded}
+     
+     \begin{beamerboxesrounded}{CART}
+         Explain
+      \end{beamerboxesrounded}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Performance on the training set}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{The Test data}
+    \begin{itemize}
+        \item Accuracy of the Bayes classifier: ????
+        \item Left/right bias in the test set: ???
+    \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Performance on test data}
+    \begin{itemize}
+        \item Bayes classifier from training data applied to test data
+        \item logistic regression
+        \item CART
+    \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Conclusions}
+    the problem and the data
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Lessons learned}
+   Tools \& environment (github, IPython, etc.)
+
+
+\end{frame}
+\end{document}

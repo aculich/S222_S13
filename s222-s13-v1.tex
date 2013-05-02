@@ -5,21 +5,29 @@
 \documentclass[fleqn]{beamer}
 \mode<presentation>
 {
-  \usetheme{CambridgeUS} % clean!
-  \usecolortheme{orchid}
-\setbeamercolor{block title}{use=structure,fg=black,bg=red!60!black}
-\setbeamercolor{block body}{use=structure,fg=white,bg=white!20!black}
+ \usetheme{CambridgeUS} % clean!
+ % \usecolortheme{orchid}
+  \usecolortheme{dolphin}
+\setbeamercolor{block title}{use=structure,fg=white,bg=blue!60!black}
+\setbeamercolor{block body}{use=structure,fg=black,bg=blue!7!white}
 %\usetheme{Goettingen}
-%  \usetheme{Pittsburgh} % simple, but right flush titles
-%  \usetheme{Copenhagen}
+% \usetheme{Pittsburgh} % simple, but right flush titles
+% \usetheme{Copenhagen}
 %  \usetheme{PaloAlto}
 %  \usetheme{Rochester} % very simple, no headings
-%  \usetheme{Berkeley} % ugly square items
+ % \usetheme{Berkeley} % ugly square items
   \setbeamercovered{transparent}  % or whatever (possibly just delete it)
 }
 \useinnertheme{rectangles}
-\setbeamertemplate{caption}[numbered]
+%\setbeamertemplate{caption}[numbered]
 \setbeamerfont{caption}{size=\tiny}
+\setbeamertemplate{footline}{%
+\leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.25ex,dp=1ex,left]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\hspace*{1em}Department of Statistics, University of California, Berkeley
+  \end{beamercolorbox}}%
+\vskip0pt}
 % If you wish to uncover everything in a step-wise fashion, uncomment
 % the following command:
 
@@ -40,7 +48,7 @@
 
 %\author[Author, Another] % (optional, use only with lots of authors)
 \author{STAT 222 Class 2013}
-\institute{{\tiny Department of Statistics \\University of California, Berkeley}}
+\institute{{\small Department of Statistics \\University of California, Berkeley}}
 
 % - Use the \inst{?} command only if the authors have different
 %   affiliation.
@@ -54,7 +62,10 @@
 
 
 \begin{frame}
+
 \titlepage
+
+
 \end{frame}
 
 %\begin{frame}
@@ -78,7 +89,9 @@
 	\end{itemize}
 
 	\begin{beamerboxesrounded}{Goal}
+	\begin{center}
 	    Predict which video in a pair will be funnier, from metadata
+         \end{center}
 	\end{beamerboxesrounded}
 \end{frame}
 

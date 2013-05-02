@@ -1,4 +1,4 @@
-% last edited 4/30/2013 3:55 by PBS
+% last edited 5/1/2013 3:55 by PBS
 % -*-Mode: LaTeX;-*-
 
 %\documentclass[fleqn,handout]{beamer}
@@ -81,16 +81,21 @@
 \frametitle{YouTube Comedy Slam Data}
 
 	\begin{itemize}
-	   \item from UCI ML Repository
+	   \item from UCI ML Repository; donated by Google employee
 	   \item a trial is an ordered pair of video IDs
 	   \item data: ordered pair $+$``left'' or ``right'' found funnier by viewer
 	   \item order of the pair in each trial was random
 	   \item repository has training data and test data
+	   \item YouTube has metadata about videos
+	   \item no data about viewers
 	\end{itemize}
 
 	\begin{beamerboxesrounded}{Goal}
 	\begin{center}
 	    Predict which video in a pair will be funnier, from metadata
+         \end{center}
+         \begin{center}
+         \small{(Is it OK to use the video IDs in the prediction?)}
          \end{center}
 	\end{beamerboxesrounded}
 \end{frame}
@@ -110,13 +115,14 @@
  \begin{frame}
 \frametitle{Descriptive statistics of training data}
       \begin{itemize}
-         \item 912969 records
-         \item 18474 distinct videos
-         \item 267211 distinct video pairs
-         \item 359874 distinct ordered pairs of videos
-         \item right video won 51.77 \% of the time. $P$-value: 0.00
-         \item viewers often discordant: '-iuk0PbfaHY wDx28Y2RcCI': left and right both win 119 times
-         \item accuracy of Bayes classifier for training data: 73.449\% (not excluding vedios without comment yet...)
+         \item 912,969 records
+         \item 18,474 distinct videos
+         \item 267,211 distinct video pairs
+         \item 359,874 distinct ordered pairs of videos
+         \item right video won 51.77\% of the time. $P$-value: nil
+         \item judgments often discordant: \\
+                  e.g., '-iuk0PbfaHY wDx28Y2RcCI' left and right each ``funnier'' 119~times
+         \item accuracy of ideal classifier for training data: 73.449\% (includes videos with no comments )
          \item for individual videos, directed graph of ``funnier than''
          \item can summarize that graph by PageRank
      \end{itemize}
@@ -135,7 +141,7 @@
          At $t=0$, $PR(p_{i};0) = \frac{1}{N}$, $N$ is the total number of nodes. \\ \hline
          $PR(p_{i};t+1) = \frac{1-d}{N} + d \sum_{p_{j} \in M(p_{i})} \frac{PR(p_{j};t)}{L(p_{j})}$ \\ \hline
          Algorithm ends when $|PR(t+1) - PR(t)| \le \epsilon$ \\ \hline
-         $d$ here is a damping factor, default value is $0.85$ in scikit-learn. \\
+         $d$ is a damping factor, default $0.85$ in scikit-learn. \\
          \hline
          \end{tabular}
          \end{center}
@@ -189,7 +195,8 @@
 		\item Stemming: used Porter Stemmer from NLTK package
 	\end{itemize}
        
-        \item Addressing Emoticons: used RegExps to replace happy faces (e.g., ``:-]'') with ``happyface'' 
+        \item Addressing Emoticons: used RegExps to replace happy faces (e.g., ``:-]'') with 
+                ``happyface'' 
                   before stripping other punctuation
 
     \end{itemize}
@@ -212,7 +219,7 @@
               \end{itemize}
          
          \item another derived feature: PageRank predicted by linear regression\\ 
-                  predictor used (among other things) $\arctan$(difference in LOL counts)
+                  using (among other things) $\arctan$(difference in LOL counts)
      
      \end{itemize}
 \end{frame}
@@ -238,7 +245,10 @@
       \begin{beamerboxesrounded}{Bayes Classifiers}     
       \begin{enumerate}\vspace{2mm}
       \item determine each video id to winning or losing ids' groups.\vspace{3mm}
-      \item for each features, calculate $\mathbb{P}_1(\mathnormal{w})$ = the percentage of occurrence among the winning ids' comments and $\mathbb{P}_0(\mathnormal{w})$ = the percentage of occurrence among the losing ids' comments.\vspace{2mm}
+      \item for each features, calculate $\mathbb{P}_1(\mathnormal{w})$ 
+             = percentage of occurrence among the winning ids' comments and 
+             $\mathbb{P}_0(\mathnormal{w})$ = 
+             percentage of occurrence among the losing ids' comments.\vspace{2mm}
       \item calculate the logOdds = $\mathnormal{\log}(\frac{\mathbb{P}(winner | comments)}{\mathbb{P}(loser | comments)}) $ for each video id: \vspace{3mm}
       
 $logOdds=\sum_{\mathnormal{w}  \in features} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
@@ -258,13 +268,14 @@ where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m
 
 \end{frame}
 
-%----------------------------------------------------------------------------------\begin{frame}
+%----------------------------------------------------------------------------------
 \begin{frame}
 \frametitle{The Test data}
     \begin{itemize}
-        \item 225593 records
-        \item 75447 distinct ordered pairs of videos
-        \item Accuracy of the Bayes classifier: 0.6946 (excluding pairs with no comments)
+        \item 225,593 records
+        \item 75,447 distinct ordered pairs of videos
+        \item [how many of those ordered pairs are not in the training data?]
+        \item Accuracy of the ideal classifier: 0.6946 (excluding pairs with no comments)
         \item right video won: 51.62\% of the time
     \end{itemize}
 
@@ -285,7 +296,12 @@ where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m
 \begin{frame}
 \frametitle{Conclusions}
     the problem and the data
-
+    \begin{itemize}
+        \item Hard problem: taste in comedy is personal, but no data on viewers
+        \item Even Bayes classifier only gets about 70\% accuracy
+        \item Surprising that ``right'' has such a big advantage
+        \item 
+     \end{itemize}
 \end{frame}
 
 %----------------------------------------------------------------------------------
@@ -295,4 +311,6 @@ where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m
 
 
 \end{frame}
+
+
 \end{document}

@@ -5,9 +5,10 @@
 \documentclass[fleqn]{beamer}
 \mode<presentation>
 {
-  \usetheme{Singapore} % clean!
+  \usetheme{CambridgeUS} % clean!
   \usecolortheme{orchid}
-\setbeamercolor{umbcboxes}{bg=violet!15,fg=black}
+\setbeamercolor{block title}{use=structure,fg=black,bg=red!60!black}
+\setbeamercolor{block body}{use=structure,fg=white,bg=white!20!black}
 %\usetheme{Goettingen}
 %  \usetheme{Pittsburgh} % simple, but right flush titles
 %  \usetheme{Copenhagen}
@@ -16,10 +17,9 @@
 %  \usetheme{Berkeley} % ugly square items
   \setbeamercovered{transparent}  % or whatever (possibly just delete it)
 }
-
+\useinnertheme{rectangles}
 \setbeamertemplate{caption}[numbered]
 \setbeamerfont{caption}{size=\tiny}
-
 % If you wish to uncover everything in a step-wise fashion, uncomment
 % the following command:
 
@@ -28,7 +28,6 @@
 \usepackage{comment}
 %\usepackage{caption}
 \usepackage{multirow}
-\usepackage{graphicx}
 \usepackage{url}
 
 \parskip 0.66ex
@@ -40,8 +39,8 @@
 {Predicting YouTube Comedy Slam Winners}
 
 %\author[Author, Another] % (optional, use only with lots of authors)
-\author{Statistics 222 Class of 2013}
-\institute{{\small Department of Statistics\\University of California, Berkeley}}
+\author{STAT 222 Class 2013}
+\institute{{\tiny STAT \\UC Berkeley}}
 
 % - Use the \inst{?} command only if the authors have different
 %   affiliation.
@@ -100,13 +99,33 @@
       \begin{itemize}
          \item 912969 records
          \item 18474 distinct videos
-         \item 267211 distinct video pairs
+         \item ??? distinct video pairs
          \item 359874 distinct ordered pairs of videos
-         \item right video won 51.77 \% of the time. $P$-value: 0.00
-         \item viewers often discordant: '-iuk0PbfaHY wDx28Y2RcCI': left and right both win 119 times
-         \item accuracy of Bayes classifier for training data: 73.449\% (not excluding vedios without comment yet...)
+         \item right video won 51.77 \% of the time. $P$-value: ???
+         \item viewers often discordant: EXAMPLE
+         \item accuracy of Bayes classifier for training data: 73.449\%
          \item for individual videos, directed graph of ``funnier than''
          \item can summarize that graph by PageRank
+     \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{PageRank}
+      \begin{itemize}
+         \item Assign each video (node) in the graph a numerical value
+         between $0$ to $1$, known as its \textsl{PageRank}.
+         \begin{center}
+         \begin{tabular}{| l |}
+         \hline
+         At $t=0$, $PR(p_{i};0) = \frac{1}{N}$, $N$ is the total number of nodes. \\ \hline
+         $PR(p_{i};t+1) = \frac{1-d}{N} + d \sum_{p_{j} \in M(p_{i})} \frac{PR(p_{j};t)}{L(p_{j})}$ \\ \hline
+         Algorithm ends when $|PR(t+1) - PR(t)| \le \epsilon$ \\ \hline
+         $d$ here is a damping factor, default value is $0.85$ in scikit-learn. \\
+         \hline
+         \end{tabular}
+         \end{center}
      \end{itemize}
 
 \end{frame}
@@ -199,10 +218,8 @@
 \begin{frame}
 \frametitle{The Test data}
     \begin{itemize}
-        \item 225593 records
-        \item 75447 distinct ordered pairs of videos
-        \item Accuracy of the Bayes classifier: 0.6946 (excluding pairs with no comments)
-        \item right video won: 51.62\% of the time
+        \item Accuracy of the Bayes classifier: 0.6946
+        \item Left/right bias in the test set: ???
     \end{itemize}
 
 \end{frame}
@@ -214,7 +231,6 @@
         \item Bayes classifier from training data applied to test data
         \item logistic regression
         \item CART
-        \item Page Rank
     \end{itemize}
 
 \end{frame}

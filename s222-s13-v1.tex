@@ -239,17 +239,17 @@
 \end{frame}
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Classifiers}	
+\frametitle{Features for Logistic Regression}	
  
 
-      \begin{beamerboxesrounded}{Bayes Classifiers}     
+      \begin{beamerboxesrounded}{Log Bayes Factors}     
       \begin{enumerate}\vspace{2mm}
       \item determine each video id to winning or losing ids' groups.\vspace{3mm}
       \item for each features, calculate $\mathbb{P}_1(\mathnormal{w})$ 
              = percentage of occurrence among the winning ids' comments and 
              $\mathbb{P}_0(\mathnormal{w})$ = 
              percentage of occurrence among the losing ids' comments.\vspace{2mm}
-      \item calculate the logOdds = $\mathnormal{\log}(\frac{\mathbb{P}(winner | comments)}{\mathbb{P}(loser | comments)}) $ for each video id: \vspace{3mm}
+      \item calculate the log Bayes factor = $\mathnormal{\log}(\frac{\mathbb{P}(winner | comments)}{\mathbb{P}(loser | comments)}) $ for each video id: \vspace{3mm}
       
 $logOdds=\sum_{\mathnormal{w}  \in features} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
 

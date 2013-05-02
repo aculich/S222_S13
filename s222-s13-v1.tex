@@ -244,16 +244,25 @@
 
       \begin{beamerboxesrounded}{Log Bayes Factors}     
       \begin{enumerate}\vspace{2mm}
-      \item determine each video id to winning or losing ids' groups.\vspace{3mm}
-      \item for each features, calculate $\mathbb{P}_1(\mathnormal{w})$ 
-             = percentage of occurrence among the winning ids' comments and 
+      \item determine whether each video won more than it lost, or vice versa.\\
+               videos that won more than lost are ``winners''\\
+               videos that lost more than won are ``losers''\vspace{2mm}
+      \item for each word $w$, find: \\
+              $\mathbb{P}_1(\mathnormal{w})$ 
+             = percentage of winner comments that contain $w$\\
              $\mathbb{P}_0(\mathnormal{w})$ = 
+<<<<<<< HEAD
              percentage of occurrence among the losing ids' comments.\vspace{2mm}
       \item calculate the log Bayes factor = $\mathnormal{\log}(\frac{\mathbb{P}(winner | comments)}{\mathbb{P}(loser | comments)}) $ for each video id: \vspace{3mm}
+=======
+             percentage of loser comments that contain $w$.\vspace{2mm}
+      \item calculate $logOdds = \mathnormal{\log}(\frac{\mathbb{P}(winner | comments)}{\mathbb{P}(loser | comments)}) $ for each video id: \vspace{3mm}
+>>>>>>> updating Bayes section
       
 $logOdds=\sum_{\mathnormal{w}  \in features} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
 
-where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m_w}$ is the number of comments contains $\mathnormal{w}.$  \vspace{3mm}
+$\mathnormal{n}$: number of comments in the video \\
+$\mathnormal{m_w}$: number of comments containing $\mathnormal{w}.$  \vspace{3mm}
 %\end{equation}
       \end{enumerate}
     \end{beamerboxesrounded}

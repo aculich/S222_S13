@@ -2,6 +2,12 @@
 *.swp
 .DS_Store
 *.db
+*.aux
+*.nav
+*.log
+*.out
+*.snm
+*.synctex.gz
 simulated_data.*
 *.pickle
 /Data/

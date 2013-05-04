@@ -1,26 +1,33 @@
-% last edited 4/30/2013 3:55 by PBS
+% last edited 5/1/2013 10:55 by PBS
 % -*-Mode: LaTeX;-*-
 
 %\documentclass[fleqn,handout]{beamer}
 \documentclass[fleqn]{beamer}
 \mode<presentation>
 {
-  \usetheme{CambridgeUS} % clean!
-  \usecolortheme{orchid}
-\setbeamercolor{block title}{use=structure,fg=black,bg=red!60!black}
-\setbeamercolor{block body}{use=structure,fg=white,bg=white!20!black}
+ \usetheme{CambridgeUS} % clean!
+ % \usecolortheme{orchid}
+  \usecolortheme{dolphin}
+\setbeamercolor{block title}{use=structure,fg=white,bg=blue!60!black}
+\setbeamercolor{block body}{use=structure,fg=black,bg=blue!7!white}
 %\usetheme{Goettingen}
-%  \usetheme{Pittsburgh} % simple, but right flush titles
-%  \usetheme{Copenhagen}
+% \usetheme{Pittsburgh} % simple, but right flush titles
+% \usetheme{Copenhagen}
 %  \usetheme{PaloAlto}
 %  \usetheme{Rochester} % very simple, no headings
-%  \usetheme{Berkeley} % ugly square items
+ % \usetheme{Berkeley} % ugly square items
   \setbeamercovered{transparent}  % or whatever (possibly just delete it)
 }
 \useinnertheme{rectangles}
-\setbeamertemplate{caption}[numbered]
+%\setbeamertemplate{caption}[numbered]
 \setbeamerfont{caption}{size=\tiny}
-\usepackage{graphicx}
+\setbeamertemplate{footline}{%
+\leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.25ex,dp=1ex,left]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\hspace*{1em}Department of Statistics, University of California, Berkeley
+  \end{beamercolorbox}}%
+\vskip0pt}
 % If you wish to uncover everything in a step-wise fashion, uncomment
 % the following command:
 
@@ -29,7 +36,6 @@
 \usepackage{comment}
 %\usepackage{caption}
 \usepackage{multirow}
-\usepackage{graphicx}
 \usepackage{url}
 
 \parskip 0.66ex
@@ -42,7 +48,7 @@
 
 %\author[Author, Another] % (optional, use only with lots of authors)
 \author{STAT 222 Class 2013}
-\institute{{\tiny STAT \\UC Berkeley}}
+\institute{{\small Department of Statistics \\University of California, Berkeley}}
 
 % - Use the \inst{?} command only if the authors have different
 %   affiliation.
@@ -56,7 +62,10 @@
 
 
 \begin{frame}
+
 \titlepage
+
+
 \end{frame}
 
 %\begin{frame}
@@ -72,15 +81,22 @@
 \frametitle{YouTube Comedy Slam Data}
 
 	\begin{itemize}
-	   \item from UCI ML Repository
-	   \item a trial is an ordered pair of video IDs
+	   \item from UCI ML Repository; donated by Google employee
+	   \item a trial is an ordered pair of video IDs $(v_i, v_j)$
 	   \item data: ordered pair $+$``left'' or ``right'' found funnier by viewer
 	   \item order of the pair in each trial was random
 	   \item repository has training data and test data
+	   \item YouTube has metadata about videos
+	   \item no data about viewers
 	\end{itemize}
 
 	\begin{beamerboxesrounded}{Goal}
+	\begin{center}
 	    Predict which video in a pair will be funnier, from metadata
+         \end{center}
+         \begin{center}
+         \small{(Is it OK to use the video IDs in the prediction?)}
+         \end{center}
 	\end{beamerboxesrounded}
 \end{frame}
 
@@ -96,16 +112,17 @@
 \end{frame}
 
 %----------------------------------------------------------------------------------
-\begin{frame}
+ \begin{frame}
 \frametitle{Descriptive statistics of training data}
       \begin{itemize}
-         \item 912969 records
-         \item 18474 distinct videos
-         \item ??? distinct video pairs
-         \item 359874 distinct ordered pairs of videos
-         \item right video won 51.77 \% of the time. $P$-value: ???
-         \item viewers often discordant: EXAMPLE
-         \item accuracy of Bayes classifier for training data: 73.449\%
+         \item 912,969 records
+         \item 18,474 distinct video IDs
+         \item 267,211 distinct video ID pairs
+         \item 359,874 distinct ordered pairs of video IDs
+         \item right video won 51.77\% of the time. $P$-value: nil
+         \item judgments often discordant: \\
+                  e.g., '-iuk0PbfaHY wDx28Y2RcCI' left and right each ``funnier'' 119~times
+         \item accuracy of ideal classifier for training data: 73.449\% (includes videos with no comments )
          \item for individual videos, directed graph of ``funnier than''
          \item can summarize that graph by PageRank
      \end{itemize}
@@ -116,7 +133,7 @@
 \begin{frame}
 \frametitle{PageRank}
       \begin{itemize}
-         \item Assign each video (node) in the graph a numerical value
+         \item Assign each video ID (node) in the graph a numerical value
          between $0$ to $1$, known as its \textsl{PageRank}.
          \begin{center}
          \begin{tabular}{| l |}
@@ -124,7 +141,7 @@
          At $t=0$, $PR(p_{i};0) = \frac{1}{N}$, $N$ is the total number of nodes. \\ \hline
          $PR(p_{i};t+1) = \frac{1-d}{N} + d \sum_{p_{j} \in M(p_{i})} \frac{PR(p_{j};t)}{L(p_{j})}$ \\ \hline
          Algorithm ends when $|PR(t+1) - PR(t)| \le \epsilon$ \\ \hline
-         $d$ here is a damping factor, default value is $0.85$ in scikit-learn. \\
+         $d$ is a damping factor, default $0.85$ in scikit-learn. \\
          \hline
          \end{tabular}
          \end{center}
@@ -163,7 +180,8 @@
 		\item Correct Spelling: tried Norvig's spelling corrector, ported to AWS. \\
 		(e.g.: ``speling"  $\rightarrow$ ``spelling")\\
                 drawback: not accurate on this corpus\\
-                  (e.g.: ``youtube'' $\rightarrow$ ``couture'', ``lol'' $\rightarrow$ ``ll'', ``haha'' $\rightarrow$ ``hata'')
+                  (e.g.: ``youtube'' $\rightarrow$ ``couture'', 
+                    ``lol'' $\rightarrow$ ``ll'', ``haha'' $\rightarrow$ ``hata'')
                    \item Text-speak:  used RegExp to standardize words\\
 		\begin{center}
         			\begin{tabular}{ | l | l |}
@@ -178,7 +196,8 @@
 		\item Stemming: used Porter Stemmer from NLTK package
 	\end{itemize}
        
-        \item Addressing Emoticons: used RegExps to replace happy faces (e.g., ``:-]'') with ``happyface'' 
+        \item Addressing Emoticons: used RegExps to replace happy faces (e.g., ``:-]'') with 
+                ``happyface'' 
                   before stripping other punctuation
 
     \end{itemize}
@@ -188,7 +207,7 @@
 \begin{frame}
 \frametitle{Bags of Bags of Words}
      \begin{itemize}
-         \item ordered pair of videos reduced to two ``bags of bags of words''  \\
+         \item ordered pair of videos $(v_1, v_2)$ reduced to two ``bags of bags of words''  \\
                   each comment is a bag, each video has a bag of bags
 
          \item features derived from bags of bags:
@@ -201,42 +220,46 @@
               \end{itemize}
          
          \item another derived feature: PageRank predicted by linear regression\\ 
-                  predictor used (among other things) $\arctan$(difference in LOL counts)
+                  using (among other things) $\arctan$(difference in LOL counts)
      
      \end{itemize}
 \end{frame}
 
-
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Classifiers}	
- 
-  
-  \begin{beamerboxesrounded}{Logistic regression}
+\frametitle{Classifiers}
+
+     \begin{beamerboxesrounded}{Logistic regression}
          Explain
      \end{beamerboxesrounded}
-         \begin{beamerboxesrounded}{CART}
+     
+     \begin{beamerboxesrounded}{CART}
          Explain
       \end{beamerboxesrounded}
 
 \end{frame}
-
-%----------------------------------------------------------------------------------
-
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Classifiers}	
+\frametitle{Features for Logistic Regression}	
  
 
-      \begin{beamerboxesrounded}{Bayes Classifiers}     
+      \begin{beamerboxesrounded}{Log Bayes Factors}     
       \begin{enumerate}\vspace{2mm}
-      \item determine each video id to winning or losing ids' groups.\vspace{3mm}
-      \item for each features, calculate $\mathbb{P}_1(\mathnormal{w})$ = the percentage of occurrence among the winning ids' comments and $\mathbb{P}_0(\mathnormal{w})$ = the percentage of occurrence among the losing ids' comments.\vspace{2mm}
-      \item calculate the logOdds = $\mathnormal{\log}(\frac{\mathbb{P}(winner | comments)}{\mathbb{P}(loser | comments)}) $ for each video id: \vspace{3mm}
-      
-$logOdds=\sum_{\mathnormal{w}  \in features} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
+      \item determine whether video $v_i$ won more than it lost, or vice versa.\\
+               if $v_i$ won more than lost, it's a ``winner''\\
+               if $v_i$ lost more than won, it's a``loser''
+               \vspace{2mm}
+      \item for each word $w$, find: \\
+              $\mathbb{P}_1(\mathnormal{w})$ 
+             = percentage of winner comments that contain $w$\\
+             $\mathbb{P}_0(\mathnormal{w})$ = 
+               percentage of loser comments that contain $w$\\
+               (pad to avoid zeros)\vspace{2mm}
+      \item derive new feature: \\      
+$logOdds(v) =\sum_{\mathnormal{w}} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
 
-where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m_w}$ is the number of comments contains $\mathnormal{w}.$  \vspace{3mm}
+$\mathnormal{n}$: number of comments on video $v$\\
+$\mathnormal{m_w}$: number of comments on video $v$ containing $\mathnormal{w}.$  \vspace{3mm}
 %\end{equation}
       \end{enumerate}
     \end{beamerboxesrounded}
@@ -244,6 +267,8 @@ where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m
 \end{frame}
 
 %----------------------------------------------------------------------------------
+%----------------------------------------------------------------------------------
+
 \begin{frame}
 \frametitle{Performance on the training set}
 
@@ -253,8 +278,11 @@ where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m
 \begin{frame}
 \frametitle{The Test data}
     \begin{itemize}
-        \item Accuracy of the Bayes classifier: 0.6946
-        \item Left/right bias in the test set: ???
+        \item 225,593 records
+        \item 75,447 distinct ordered pairs of videos
+        \item [how many of those ordered pairs are not in the training data?]
+        \item Accuracy of the ideal classifier: 0.6946 (excluding pairs with no comments)
+        \item right video won: 51.62\% of the time
     \end{itemize}
 
 \end{frame}
@@ -274,7 +302,12 @@ where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m
 \begin{frame}
 \frametitle{Conclusions}
     the problem and the data
-
+    \begin{itemize}
+        \item Hard problem: taste in comedy is personal, but no data on viewers
+        \item Even Bayes classifier only gets about 70\% accuracy
+        \item Surprising that ``right'' has such a big advantage
+        \item 
+     \end{itemize}
 \end{frame}
 
 %----------------------------------------------------------------------------------
@@ -284,4 +317,6 @@ where $\mathnormal{n}$ is the number of comments in the video and $\mathnormal{m
 
 
 \end{frame}
+
+
 \end{document}

@@ -151,24 +151,28 @@
 
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Acquiring metadata}
-   \begin{itemize}
-       \item queried YouTube with video IDs using Google APIs w/i Python
-       \item speedbumps: had to throttle the requests
-       \item stored ``snapshot'' data as pickled Python dict
-   \end{itemize}
-\end{frame}
-
-%----------------------------------------------------------------------------------
-\begin{frame}
 \frametitle{Prediction using metadata: Feature selection}
       \begin{itemize}
-          \item used mutual information to screen potential features
-          \item quantitative metadata (e.g., \#views, rating, \#raters) unhelpful
-          \item comments more promising
+      	\item Acquired metadata: queried YouTube with video IDs using Google APIs w/i Python
+          \item Compute mutual information: \\
+          		\begin{center}
+        			\begin{tabular}{ | l | l |}
+			\hline
+			Variable & Mutual Info (bits) \\ \hline
+			avgerage rating & 0.00227\\ \hline
+			number of views & 0.00431\\ \hline
+			number of votes & 0.00468\\ \hline
+			views per day & 0.00382 \\
+			\hline
+			\end{tabular}
+					
+      		\end{center}	
+          \item Logistic regression of log score of average rating, number of views and number of votes
+          \item Comments more promising
       \end{itemize}
 
 \end{frame}
+
 
 %----------------------------------------------------------------------------------
 \begin{frame}
@@ -207,20 +211,19 @@
 \begin{frame}
 \frametitle{Bags of Bags of Words}
      \begin{itemize}
-         \item ordered pair of videos $(v_1, v_2)$ reduced to two ``bags of bags of words''  \\
+         \item ordered pair of videos reduced to two ``bags of bags of words''  \\
                   each comment is a bag, each video has a bag of bags
 
          \item features derived from bags of bags:
              \begin{itemize}
-                 \item presence of a word in any comment
+                 \item presence of a word  among video ids 
                  \item frequency of comments with a given word
                  \item relative frequency of comments with a given word
                  \item  logOdds of frequencies and relative frequencies
-                 \item etc.
               \end{itemize}
          
          \item another derived feature: PageRank predicted by linear regression\\ 
-                  using (among other things) $\arctan$(difference in LOL counts)
+                  predictor used (among other things) $\arctan$(difference in LOL counts)
      
      \end{itemize}
 \end{frame}

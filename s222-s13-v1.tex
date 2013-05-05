@@ -227,20 +227,29 @@
 
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Classifiers}
+\frametitle{Models}
 
-     \begin{beamerboxesrounded}{Logistic regression}
+     \begin{beamerboxesrounded}{Logistic regression with Log Bayes Factor}
+         Binary Output (Left v.s. Right) as response variable\\
+         log bayes factor of the two ordered ids and a constant term as features
+     \end{beamerboxesrounded}
+
+     \begin{beamerboxesrounded}{Logistic regression Wenchang}
          Explain
      \end{beamerboxesrounded}
-     
+
      \begin{beamerboxesrounded}{CART}
          Explain
       \end{beamerboxesrounded}
+     
+      \begin{beamerboxesrounded}{Page Rank}
+         Explain
+     \end{beamerboxesrounded}
 
 \end{frame}
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Features for Logistic Regression}	
+\frametitle{Features for Logistic Regression 1}	
  
 
       \begin{beamerboxesrounded}{Log Bayes Factors}     
@@ -254,7 +263,8 @@
              = percentage of winner comments that contain $w$\\
              $\mathbb{P}_0(\mathnormal{w})$ = 
                percentage of loser comments that contain $w$\\
-               (pad to avoid zeros)\vspace{2mm}
+               (pad to avoid zeros)\\
+               (Only used comments of "significant" winners/losers)\vspace{2mm}
       \item derive new feature: \\      
 $logOdds(v) =\sum_{\mathnormal{w}} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
 
@@ -267,11 +277,24 @@ $\mathnormal{m_w}$: number of comments on video $v$ containing $\mathnormal{w}.$
 \end{frame}
 
 %----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Features for Logistic Regression 2}
+Wenchang please fill in this slide.
+
+\end{frame}
+
 %----------------------------------------------------------------------------------
 
 \begin{frame}
 \frametitle{Performance on the training set}
 
+    \begin{beamerboxesrounded}{Common criterion to measure performances}
+
+     score= $\frac{Number of Correct Prediction}{Number of Predictable Pairs}$
+     \end{beamerboxesrounded}
+    \begin{itemize}
+          \item Logistic with bayes odds: 53.3\%
+    \end{itemize}
 \end{frame}
 
 %----------------------------------------------------------------------------------
@@ -304,7 +327,7 @@ $\mathnormal{m_w}$: number of comments on video $v$ containing $\mathnormal{w}.$
     the problem and the data
     \begin{itemize}
         \item Hard problem: taste in comedy is personal, but no data on viewers
-        \item Even Bayes classifier only gets about 70\% accuracy
+        \item The ideal classifier only gets about 70\% accuracy
         \item Surprising that ``right'' has such a big advantage
         \item 
      \end{itemize}

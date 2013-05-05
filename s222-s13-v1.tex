@@ -210,7 +210,7 @@
 %----------------------------------------------------------------------------------
 \begin{frame}
 \frametitle{Bags of Bags of Words}
-     \begin{itemize}
+      \begin{itemize}
          \item ordered pair of videos reduced to two ``bags of bags of words''  \\
                   each comment is a bag, each video has a bag of bags
 
@@ -223,10 +223,11 @@
               \end{itemize}
          
          \item another derived feature: PageRank predicted by linear regression\\ 
-                  predictor used (among other things) $\arctan$(difference in LOL counts)
+                  using (among other things) $\arctan$(difference in LOL counts)/$({\pi}/2)$
      
      \end{itemize}
 \end{frame}
+
 
 %----------------------------------------------------------------------------------
 \begin{frame}
@@ -246,7 +247,10 @@
       \end{beamerboxesrounded}
      
       \begin{beamerboxesrounded}{Page Rank}
-         Explain
+         Binary Ouput and "LOL" Count as link's weight indicators\\
+         Each node represents a video, if a video A is funnier than B, than a directed link
+         with weight = \#\;of\;A\;funnier\;than\;B + arctan (\# of lol(A-B))/$({\pi}/2)$\\
+         (Implemented arctan to shrink an integer to $(0,1)$, small modification)
      \end{beamerboxesrounded}
 
 \end{frame}
@@ -281,11 +285,64 @@ $\mathnormal{m_w}$: number of comments on video $v$ containing $\mathnormal{w}.$
 
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Features for Logistic Regression 2}
-Wenchang please fill in this slide.
+\frametitle{Logistic regression 2 Data preprocessing}
+    \begin{itemize}
+     \item Clean comments: only keep meaningful words.\\
+     nltk.tokenize, nltk.corpus 
+     \item Build Dictrionary: order words by frequency. (Top frequent words: like, love, lol,funni, video) \\
+     Structure of dictionary, $dict()$ and Set, $set()$
+     \item Building X matrix blockwise: divide $20000$ rows as a block and save all the blocks to disk.      
+	 \begin{center}
+	 \[ X =\left( \begin{array}{ccc}
+	    X_1 \\
+	    X_2 \\
+	    ... \\
+	    X_B \end{array} \right)
+	  \]
+	\end{center}
+     \end{itemize}
 
 \end{frame}
+%---------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{logistic regression 2}
+    \begin{itemize}
+     \item Model: treating high frequency $(\geq 1500)$ words as features\\
+     $$Logit\ Y = \beta_0 + \beta_1 x_1 + ... + \beta_m x_m = \beta^T X$$
+     \item $Logit\ Y$: log odds of each ID pair, i.e $log(\frac{No.\ left\ funnier}{No.\ right\ funnier})$
+     \item $x_i$:  difference of appearence of word $i$ in each ID pair.
+     \item Size of matrix $X$: $359874 \times 3392$\\
+     $$X^TX = \sum_{b=1}^{Block\ No.} X_b^TX_b$$
+     $$X^TY = \sum_{b=1}^{Block\ No.} X_b^TY_b$$
+    \end{itemize}
+\end{frame}
+%---------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Regression Tree}
+    \begin{itemize}
+     \item Model
+     $$f(x) = \sum_{k=1}^K c_k I(x \in R_k)$$
+     $R_k$: partition of feature space. (still treat high frequency words as features)
+     \item By minimizing MSE, we get
+     $$\hat{c}_k = ave(y_i | x_i \in R_k)$$
+     \item How to find region $R_k$?
+    \end{itemize}
+\end{frame}
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Regression Tree}
+  \begin{itemize}
+   \item Greedy algorithm to find partitions
+   $$R_1(j, s) = \{X|x_j \leq s\}\ and\ R_2(j, s) = \{X|x_j \ > s\}$$
+   Seek the splitting variable $j$ and split point $s$ by solving
+   $$\min_{j,s} [\min_{c_1} \sum_{x_i \in R_1(j, s)} (y_i - c_1)^2 + \min_{c_2} \sum_{x_i \in R_2(j, s)} (y_i - c_2)^2]$$
+   Inner minimization is solved by
+   $$\hat{c}_1 = ave(y_i| x_i \in R_1(j,s)),\ \hat{c}_2 = ave(y_i|x_i \in R_2(j,s))$$
+   Scan through all of the inputs to determinate the best pair $(j, s)$. Repeat the splitting process on each of the two regions.
+  \item Python package: $mlpy$.
+  \end{itemize}
 
+\end{frame}
 %----------------------------------------------------------------------------------
 
 \begin{frame}
@@ -306,7 +363,6 @@ Wenchang please fill in this slide.
     \begin{itemize}
         \item 225,593 records
         \item 75,447 distinct ordered pairs of videos
-        \item [how many of those ordered pairs are not in the training data?]
         \item Accuracy of the ideal classifier: 0.6946 (excluding pairs with no comments)
         \item right video won: 51.62\% of the time
     \end{itemize}
@@ -317,9 +373,9 @@ Wenchang please fill in this slide.
 \begin{frame}
 \frametitle{Performance on test data}
     \begin{itemize}
-        \item Bayes classifier from training data applied to test data
-        \item logistic regression
-        \item CART
+        \item Bayes classifier from training data applied to test data: 52.3\%
+        \item logistic regression: 52.17\%
+        \item CART: 52.79\%
     \end{itemize}
 
 \end{frame}

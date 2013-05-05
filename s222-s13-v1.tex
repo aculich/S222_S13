@@ -123,8 +123,8 @@
          \item judgments often discordant: 
                   '-iuk0PbfaHY wDx28Y2RcCI' \\
                   left and right each ``funnier'' 119~times
-         \item accuracy of ideal classifier for training data: 73.4\% \\
-                  (includes videos with no comments )
+         \item accuracy of ideal (Bayes) classifier for training data: 73.4\% \\
+                  \#correct/\#cases (includes videos with no comments)
          \item if order is ignored,  accuracy of ideal classifier drops to 65\%
      \end{itemize}
 
@@ -149,8 +149,8 @@
          \hline
          \end{tabular}
          \end{center}
-         \item Amounts to using the power method to estimate the top 
-                  eigenvector of incidence matrix
+         \item Amounts to using the power method to estimate the principal 
+                  eigenvector of incidence matrix of the directed graph
      \end{itemize}
 
 \end{frame}
@@ -159,7 +159,8 @@
 \begin{frame}
 \frametitle{Prediction using metadata: Feature selection}
       \begin{itemize}
-      	\item Acquired metadata: queried YouTube with video IDs using Google APIs w/i Python
+      	\item Acquired metadata: queried YouTube with video IDs using Google APIs in Python\\
+	         nontrivial: required throttling the requests
           \item Mutual information: \\
           		\begin{center}
         			\begin{tabular}{ | l | l |}
@@ -190,7 +191,7 @@
         	\begin{itemize}
 		\item Spelling: tried Norvig's spelling corrector, ported to AWS. \\
 		(e.g.: ``speling"  $\rightarrow$ ``spelling")\\
-                drawback: not accurate on this corpus\\
+                Not accurate on this corpus\\
                   (e.g.: ``youtube'' $\rightarrow$ ``couture'', 
                     ``lol'' $\rightarrow$ ``ll'', ``haha'' $\rightarrow$ ``hata'')
                    \item Text-speak:  used RegExp to standardize words\\
@@ -208,7 +209,7 @@
                 ``happyface'' 
                   before stripping other punctuation
 	\end{itemize}
-                \item Stemmed with nltk PorterStemmer; kept only meaningful words
+                \item Stemmed with nltk PorterStemmer; removed ``stopwords''
                 \item Most frequent words: like, love, lol, funni, video
     \end{itemize}
 \end{frame}
@@ -291,13 +292,13 @@ $\mathnormal{m_w}$: \#comments on video $v$ containing $\mathnormal{w}.$  \vspac
 \begin{frame}
 \frametitle{Linear regression}
     \begin{itemize}
-     \item Model: treating high frequency $(\geq 1500)$ words as features\\
+     \item Model: high frequency words (in $\geq$ 1500 comments) as features\\
      $$Logit\ Y = \beta_0 + \beta_1 x_1 + ... + \beta_m x_m = \beta^T X$$
-     \item $Logit\ Y$: log odds of each ID pair, i.e $log(\frac{\#\ left\ funnier}{\#\ right\ funnier})$
+     \item $Logit\ Y$: log odds for ID pair, $log(\frac{\#\ left\ funnier}{\#\ right\ funnier})$
      \item $x_i$:  difference in \#comments containing $w_i$ for 
               $v_{\mbox{left}}$ and $v_{\mbox{right}}$
-     \item Build $X$ in $B$ blocks of $20,000$ rows; save all the blocks to disk.   
-     \item Dimension of $X$: 359,874 $\times$ 3392\\
+     \item Dimension of $X$: 359,874 $\times$ 3,392
+     \item Build $X$ in $B$ blocks of 20,000 rows; save all the blocks to disk.   \\
      $$X^TX = \sum_{b=1}^B X_b^TX_b$$
      $$X^TY = \sum_{b=1}^B X_b^TY_b$$
   \end{itemize}
@@ -320,7 +321,7 @@ $\mathnormal{m_w}$: \#comments on video $v$ containing $\mathnormal{w}.$  \vspac
      \item Features: high frequency words
      \item Model
      $$f(x) = \sum_{k=1}^K c_k I_{x \in R_k}$$
-     \item $R_k$: partition of feature space. 
+     \item $\{R_k\}_{k=1}^K$: partition of feature space. 
      \item $c_k \in \{0, 1\}$.
      \item How to find region $R_k$?
     \end{itemize}
@@ -350,20 +351,16 @@ $\mathnormal{m_w}$: \#comments on video $v$ containing $\mathnormal{w}.$  \vspac
         \item 225,593 records
         \item 75,447 distinct ordered pairs of videos
         \item right video won 51.6\% of the time
+        \item Accuracy of ideal (Bayes) classifier: 69.5\% 
+        \item Accuracy of Bayes classifier w/o order info: 65\%
     \end{itemize}
 
 \end{frame}
 
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Performance on test data}
-  \begin{center}
-        Accuracy: $\frac{\mbox{correct predictions}}{\mbox{pairs with comments}}$
-    \end{center}
-    
+\frametitle{Performance on test data: only count pairs with comments}
       \begin{itemize}
-        \item Accuracy of ideal (Bayes) classifier: 69.5\% 
-        \item Accuracy of Bayes classifier w/o order info: 65\%
         \item logistic regression: 52.3\%
         \item linear regression: 52.17\%
         \item PageRank linear regression classifier: 51.3\%
@@ -381,6 +378,9 @@ $\mathnormal{m_w}$: \#comments on video $v$ containing $\mathnormal{w}.$  \vspac
         \item Comments: 
         	\begin{itemize}
 	   \item heavy cleanup---must look at data by hand to understand problems
+	   \item many comments irrelevant
+	   \item many foreign-language comments
+	   \item text-speak and emoticons matter
 	   \item treat comments as bags of bags of words
 	   \item derive features from the bags
 	   \item logistic regression
@@ -389,20 +389,21 @@ $\mathnormal{m_w}$: \#comments on video $v$ containing $\mathnormal{w}.$  \vspac
 	   \item CART
 	\end{itemize}
        \item Results not encouraging: problem is HARD
-       \item Humor very personal
+       \item Humor very personal: lots of disagreement among voters
        \item Even the order of presentation matters
+       \item Grouping/modeling individual voters might help, a la Netflix. \\
+                No rater information available in this dataset.
     \end{itemize}
 
 \end{frame}
 
-%----------------------------------------------------------------------------------
-\begin{frame}
-\frametitle{Improvements}
-   \begin{itemize}
-      \item Make better use of GitHub
-      \item Ability to group/model individual raters might help, a la Netflix
-   \end{itemize}
-\end{frame}
+%%----------------------------------------------------------------------------------
+%\begin{frame}
+%\frametitle{Improvements}
+%   \begin{itemize}
+%      \item Make better use of GitHub
+%   \end{itemize}
+%\end{frame}
 
 %----------------------------------------------------------------------------------
 \begin{frame}

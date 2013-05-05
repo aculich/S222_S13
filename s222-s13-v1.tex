@@ -273,7 +273,7 @@
                (pad to avoid zeros)\\
                (Only used comments of "significant" winners/losers)\vspace{2mm}
       \item derive new feature: \\      
-$logOdds(v) =\sum_{\mathnormal{w}} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
+$B(v)=logOdds(v) =\sum_{\mathnormal{w}} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
 
 $\mathnormal{n}$: number of comments on video $v$\\
 $\mathnormal{m_w}$: number of comments on video $v$ containing $\mathnormal{w}.$  \vspace{3mm}
@@ -281,6 +281,24 @@ $\mathnormal{m_w}$: number of comments on video $v$ containing $\mathnormal{w}.$
       \end{enumerate}
     \end{beamerboxesrounded}
 
+\end{frame}
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Logistic Regression 1 with Log Bayes Factors}
+\begin{center}
+$logit(\mathbb{P})=X\beta$
+\end{center}
+    \begin{itemize}
+        \item $\mathbb{P}$\ = \ Probability that the right video is funnier
+       \item   \[ X = \left( \begin{array} {ccc}
+		     1 & B(v_{11}) & B(v_{12})\\
+		      \vdots & \ddots & \vdots \\
+		      1 & B(v_{n1}) & B(v_{n1})
+		     \end{array} \right)
+	 	 \]
+       
+
+    \end{itemize}
 \end{frame}
 
 %----------------------------------------------------------------------------------

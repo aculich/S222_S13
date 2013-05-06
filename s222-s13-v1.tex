@@ -1,4 +1,4 @@
-% last edited 5/1/2013 10:55 by PBS
+% last edited 5/5/2013 10:55 by PBS
 % -*-Mode: LaTeX;-*-
 
 %\documentclass[fleqn,handout]{beamer}
@@ -83,7 +83,7 @@
 	\begin{itemize}
 	   \item from UCI ML Repository; donated by Google employee
 	   \item a trial is an ordered pair of video IDs $(v_i, v_j)$
-	   \item data: ordered pair $+$``left'' or ``right'' found funnier by viewer
+	   \item data: $(v_i, v_j)$ $+$``left'' or ``right'' found funnier by viewer
 	   \item order of the pair in each trial was random
 	   \item repository has training data and test data
 	   \item YouTube has metadata about videos
@@ -95,7 +95,7 @@
 	    Predict which video in a pair will be funnier, from metadata
          \end{center}
          \begin{center}
-         \small{(Is it OK to use the video IDs in the prediction?)}
+         \small{(Not OK to use video IDs as features.)}
          \end{center}
 	\end{beamerboxesrounded}
 \end{frame}
@@ -119,12 +119,13 @@
          \item 18,474 distinct video IDs
          \item 267,211 distinct video ID pairs
          \item 359,874 distinct ordered pairs of video IDs
-         \item right video won 51.77\% of the time. $P$-value: nil
-         \item judgments often discordant: \\
-                  e.g., '-iuk0PbfaHY wDx28Y2RcCI' left and right each ``funnier'' 119~times
-         \item accuracy of ideal classifier for training data: 73.449\% (includes videos with no comments )
-         \item for individual videos, directed graph of ``funnier than''
-         \item can summarize that graph by PageRank
+         \item right video won 51.8\% of the time. $P$-value: nil
+         \item judgments often discordant: 
+                  '-iuk0PbfaHY wDx28Y2RcCI' \\
+                  left and right each ``funnier'' 119~times
+         \item accuracy of ideal (Bayes) classifier for training data: 73.4\% \\
+                  \#correct/\#cases (includes videos with no comments)
+         \item if order is ignored,  accuracy of ideal classifier drops to 65\%
      \end{itemize}
 
 \end{frame}
@@ -133,18 +134,23 @@
 \begin{frame}
 \frametitle{PageRank}
       \begin{itemize}
-         \item Assign each video ID (node) in the graph a numerical value
-         between $0$ to $1$, known as its \textsl{PageRank}.
+         \item for individual videos, directed graph of ``funnier than''
+         \item can summarize that graph by PageRank
+         \item PageRank algorithm: \\
+               Assign each video ID (graph node) a value
+                between $0$ to $1$, known as its \textsl{PageRank}.
          \begin{center}
          \begin{tabular}{| l |}
          \hline
          At $t=0$, $PR(p_{i};0) = \frac{1}{N}$, $N$ is the total number of nodes. \\ \hline
          $PR(p_{i};t+1) = \frac{1-d}{N} + d \sum_{p_{j} \in M(p_{i})} \frac{PR(p_{j};t)}{L(p_{j})}$ \\ \hline
-         Algorithm ends when $|PR(t+1) - PR(t)| \le \epsilon$ \\ \hline
+         Stop when $|PR(t+1) - PR(t)| \le \epsilon$ \\ \hline
          $d$ is a damping factor, default $0.85$ in scikit-learn. \\
          \hline
          \end{tabular}
          \end{center}
+         \item Amounts to using the power method to estimate the principal 
+                  eigenvector of incidence matrix of the directed graph
      \end{itemize}
 
 \end{frame}
@@ -153,21 +159,23 @@
 \begin{frame}
 \frametitle{Prediction using metadata: Feature selection}
       \begin{itemize}
-      	\item Acquired metadata: queried YouTube with video IDs using Google APIs w/i Python
-          \item Compute mutual information: \\
+      	\item Acquired metadata: queried YouTube with video IDs using Google APIs in Python\\
+	         nontrivial: required throttling the requests
+          \item Mutual information: \\
           		\begin{center}
         			\begin{tabular}{ | l | l |}
 			\hline
 			Variable & Mutual Info (bits) \\ \hline
-			avgerage rating & 0.00227\\ \hline
+			average rating & 0.00227\\ \hline
 			number of views & 0.00431\\ \hline
 			number of votes & 0.00468\\ \hline
 			views per day & 0.00382 \\
 			\hline
 			\end{tabular}
-					
+
       		\end{center}	
-          \item Logistic regression of log score of average rating, number of views and number of votes
+          \item Logistic regression using log(average rating), \# views, \# votes
+                   had negligible ``lift''
           \item Comments more promising
       \end{itemize}
 
@@ -176,34 +184,33 @@
 
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Issues with comments}
+\frametitle{Comments: complications and cleaning}
     \begin{itemize}
-   	\item Data Encoding: encoded the words to ASCII format and omit the garbled words
+   	\item Data Encoding: re-encoded comments in ASCII; omit garbled words
         \item Inconsistent Spellings 
         	\begin{itemize}
-		\item Correct Spelling: tried Norvig's spelling corrector, ported to AWS. \\
+		\item Spelling: tried Norvig's spelling corrector, ported to AWS. \\
 		(e.g.: ``speling"  $\rightarrow$ ``spelling")\\
-                drawback: not accurate on this corpus\\
+                Not accurate on this corpus\\
                   (e.g.: ``youtube'' $\rightarrow$ ``couture'', 
                     ``lol'' $\rightarrow$ ``ll'', ``haha'' $\rightarrow$ ``hata'')
                    \item Text-speak:  used RegExp to standardize words\\
 		\begin{center}
         			\begin{tabular}{ | l | l |}
 			\hline
-			Patterns & As \\ \hline
+			Pattern & standard \\ \hline
 			lol, lolll, llol, lollololl & lol \\ \hline
 			ha, hahahh, ahaha, jhajha & ha \\
 			\hline
 			\end{tabular}
-					
+
       		\end{center}
-		\item Stemming: used Porter Stemmer from NLTK package
-	\end{itemize}
-       
-        \item Addressing Emoticons: used RegExps to replace happy faces (e.g., ``:-]'') with 
+		\item Emoticons: used RegExps to replace happy faces (e.g., ``:-]'') with 
                 ``happyface'' 
                   before stripping other punctuation
-
+	\end{itemize}
+                \item Stemmed with nltk PorterStemmer; removed ``stopwords''
+                \item Most frequent words: like, love, lol, funni, video
     \end{itemize}
 \end{frame}
 
@@ -216,75 +223,74 @@
 
          \item features derived from bags of bags:
              \begin{itemize}
-                 \item presence of a word  among video ids 
-                 \item frequency of comments with a given word
-                 \item relative frequency of comments with a given word
+                 \item presence of a word in any comment for video ID
+                 \item (relative) frequency of comments that contain a given word
                  \item  logOdds of frequencies and relative frequencies
               \end{itemize}
          
-         \item another derived feature: PageRank predicted by linear regression\\ 
+         \item derived feature: PageRank predicted by linear regression\\ 
                   using (among other things) $\arctan$(difference in LOL counts)/$({\pi}/2)$
      
      \end{itemize}
 \end{frame}
 
 
+
+%%----------------------------------------------------------------------------------
+%\begin{frame}
+%\frametitle{Models}
+%
+%     \begin{beamerboxesrounded}{Logistic regression with Log Bayes Factor}
+%         Binary Output (Left v.s. Right) as response variable\\
+%         log Bayes factor of the two ordered ids and a constant term as features
+%     \end{beamerboxesrounded}
+%
+%     \begin{beamerboxesrounded}{Logistic regression Wenchang}
+%         Explain
+%     \end{beamerboxesrounded}
+%
+%     \begin{beamerboxesrounded}{CART}
+%         Explain
+%      \end{beamerboxesrounded}
+%     
+%      \begin{beamerboxesrounded}{Page Rank}
+%         Binary Ouput and "LOL" Count as link's weight indicators\\
+%         Each node represents a video, if a video A is funnier than B, than a directed link
+%         with weight = \#\;of\;A\;funnier\;than\;B + arctan (\# of lol(A-B))/$({\pi}/2)$\\
+%         (Implemented arctan to shrink an integer to $(0,1)$, small modification)
+%     \end{beamerboxesrounded}
+%
+%\end{frame}
+
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Models}
+\frametitle{Logistic Regression: log Bayes factor as feature}	
 
-     \begin{beamerboxesrounded}{Logistic regression with Log Bayes Factor}
-         Binary Output (Left v.s. Right) as response variable\\
-         log bayes factor of the two ordered ids and a constant term as features
-     \end{beamerboxesrounded}
-
-     \begin{beamerboxesrounded}{Logistic regression Wenchang}
-         Explain
-     \end{beamerboxesrounded}
-
-     \begin{beamerboxesrounded}{CART}
-         Explain
-      \end{beamerboxesrounded}
-     
-      \begin{beamerboxesrounded}{Page Rank}
-         Binary Ouput and "LOL" Count as link's weight indicators\\
-         Each node represents a video, if a video A is funnier than B, than a directed link
-         with weight = \#\;of\;A\;funnier\;than\;B + arctan (\# of lol(A-B))/$({\pi}/2)$\\
-         (Implemented arctan to shrink an integer to $(0,1)$, small modification)
-     \end{beamerboxesrounded}
-
-\end{frame}
-%----------------------------------------------------------------------------------
-\begin{frame}
-\frametitle{Features for Logistic Regression 1}	
- 
-
-      \begin{beamerboxesrounded}{Log Bayes Factors}     
       \begin{enumerate}\vspace{2mm}
       \item determine whether video $v_i$ won more than it lost, or vice versa.\\
                if $v_i$ won more than lost, it's a ``winner''\\
                if $v_i$ lost more than won, it's a``loser''
                \vspace{2mm}
-      \item for each word $w$, find: \\
+      \item for each word $w$ in comment of ``significant'' winner/loser, find: \\
               $\mathbb{P}_1(\mathnormal{w})$ 
              = percentage of winner comments that contain $w$\\
              $\mathbb{P}_0(\mathnormal{w})$ = 
                percentage of loser comments that contain $w$\\
                (pad to avoid zeros)\\
-               (Only used comments of "significant" winners/losers)\vspace{2mm}
+               \vspace{2mm}
       \item derive new feature: \\      
-$B(v)=logOdds(v) =\sum_{\mathnormal{w}} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
+$logOdds(v) =\sum_{\mathnormal{w}} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
 
-$\mathnormal{n}$: number of comments on video $v$\\
-$\mathnormal{m_w}$: number of comments on video $v$ containing $\mathnormal{w}.$  \vspace{3mm}
+$\mathnormal{n}$: \#comments on video $v$\\
+$\mathnormal{m_w}$: \#comments on video $v$ containing $\mathnormal{w}.$  \vspace{3mm}
 %\end{equation}
       \end{enumerate}
-    \end{beamerboxesrounded}
 
 \end{frame}
-%----------------------------------------------------------------------------------
+
+%---------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Logistic Regression 1 with Log Bayes Factors}
+\frametitle{Logistic Regression with Log Bayes Factors}
 \begin{center}
 $logit(\mathbb{P})=X\beta$
 \end{center}
@@ -303,97 +309,86 @@ $logit(\mathbb{P})=X\beta$
 
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Logistic regression 2 Data preprocessing}
+\frametitle{Linear regression}
     \begin{itemize}
-     \item Clean comments: only keep meaningful words.\\
-     nltk.tokenize, nltk.corpus 
-     \item Build Dictrionary: order words by frequency. (Top frequent words: like, love, lol,funni, video) \\
-     Structure of dictionary, $dict()$ and Set, $set()$
-     \item Building X matrix blockwise: divide $20000$ rows as a block and save all the blocks to disk.      
-	 \begin{center}
-	 \[ X =\left( \begin{array}{ccc}
-	    X_1 \\
-	    X_2 \\
-	    ... \\
-	    X_B \end{array} \right)
-	  \]
-	\end{center}
-     \end{itemize}
-
-\end{frame}
-%---------------------------------------------------------------------------------
-\begin{frame}
-\frametitle{logistic regression 2}
-    \begin{itemize}
-     \item Model: treating high frequency $(\geq 1500)$ words as features\\
+     \item Model: high frequency words (in $\geq$ 1500 comments) as features\\
      $$Logit\ Y = \beta_0 + \beta_1 x_1 + ... + \beta_m x_m = \beta^T X$$
-     \item $Logit\ Y$: log odds of each ID pair, i.e $log(\frac{No.\ left\ funnier}{No.\ right\ funnier})$
-     \item $x_i$:  difference of appearence of word $i$ in each ID pair.
-     \item Size of matrix $X$: $359874 \times 3392$\\
-     $$X^TX = \sum_{b=1}^{Block\ No.} X_b^TX_b$$
-     $$X^TY = \sum_{b=1}^{Block\ No.} X_b^TY_b$$
-    \end{itemize}
+     \item $Logit\ Y$: log odds for ID pair, $log(\frac{\#\ left\ funnier}{\#\ right\ funnier})$
+     \item $x_i$:  difference in \#comments containing $w_i$ for 
+              $v_{\mbox{left}}$ and $v_{\mbox{right}}$
+     \item Dimension of $X$: 359,874 $\times$ 3,392
+     \item Build $X$ in $B$ blocks of 20,000 rows; save all the blocks to disk.   \\
+     $$X^TX = \sum_{b=1}^B X_b^TX_b$$
+     $$X^TY = \sum_{b=1}^B X_b^TY_b$$
+  \end{itemize}
 \end{frame}
+
 %---------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Regression Tree}
+\frametitle{PageRank Linear regression classifier}
     \begin{itemize}
+     \item Predict continuous PageRank of video IDs from word frequencies by linear regression
+     \item Classify pair as ``right'' if predicted PageRank of right video is higher than left
+     \item Classify pair as ``left'' if predicted PageRank of left video is higher than right
+   \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{CART}
+    \begin{itemize}
+     \item Features: high frequency words
      \item Model
-     $$f(x) = \sum_{k=1}^K c_k I(x \in R_k)$$
-     $R_k$: partition of feature space. (still treat high frequency words as features)
-     \item By minimizing MSE, we get
-     $$\hat{c}_k = ave(y_i | x_i \in R_k)$$
+     $$f(x) = \sum_{k=1}^K c_k I_{x \in R_k}$$
+     \item $\{R_k\}_{k=1}^K$: partition of feature space. 
+     \item $c_k \in \{0, 1\}$.
      \item How to find region $R_k$?
     \end{itemize}
 \end{frame}
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Regression Tree}
+\frametitle{CART--FIX ME!}
   \begin{itemize}
    \item Greedy algorithm to find partitions
    $$R_1(j, s) = \{X|x_j \leq s\}\ and\ R_2(j, s) = \{X|x_j \ > s\}$$
    Seek the splitting variable $j$ and split point $s$ by solving
-   $$\min_{j,s} [\min_{c_1} \sum_{x_i \in R_1(j, s)} (y_i - c_1)^2 + \min_{c_2} \sum_{x_i \in R_2(j, s)} (y_i - c_2)^2]$$
+   $$\min_{j,s} [\min_{c_1} \sum_{x_i \in R_1(j, s)} (y_i - c_1)^2 + \min_{c_2} 
+   \sum_{x_i \in R_2(j, s)} (y_i - c_2)^2]$$
    Inner minimization is solved by
    $$\hat{c}_1 = ave(y_i| x_i \in R_1(j,s)),\ \hat{c}_2 = ave(y_i|x_i \in R_2(j,s))$$
-   Scan through all of the inputs to determinate the best pair $(j, s)$. Repeat the splitting process on each of the two regions.
+   Scan through all of the inputs to determinate the best pair $(j, s)$. 
+   Repeat the splitting process on each of the two regions.
   \item Python package: $mlpy$.
   \end{itemize}
 
 \end{frame}
-%----------------------------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Performance on the training set}
-
-    \begin{beamerboxesrounded}{Common criterion to measure performances}
-
-     score= $\frac{Number of Correct Prediction}{Number of Predictable Pairs}$
-     \end{beamerboxesrounded}
-    \begin{itemize}
-          \item Logistic with bayes odds: 53.3\%
-    \end{itemize}
-\end{frame}
 
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{The Test data}
+\frametitle{Test data}
     \begin{itemize}
         \item 225,593 records
         \item 75,447 distinct ordered pairs of videos
-        \item Accuracy of the ideal classifier: 0.6946 (excluding pairs with no comments)
-        \item right video won: 51.62\% of the time
+        \item right video won 51.6\% of the time
+        \item Accuracy of ideal (Bayes) classifier: 69.5\% 
+        \item Accuracy of Bayes classifier w/o order info: 65\%
     \end{itemize}
 
 \end{frame}
 
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{Performance on test data}
-    \begin{itemize}
-        \item Bayes classifier from training data applied to test data: 52.3\%
-        \item logistic regression: 52.17\%
-        \item CART: 52.79\%
+\frametitle{Performance on test data: only count pairs with comments}
+\begin{beamerboxesrounded}{}
+	\begin{center}
+	 score=$\frac{Number \indent of \indent Correct \indent Prediction}{Number \indent of \indent Predictable \indent Pairs}$
+         \end{center}
+	\end{beamerboxesrounded}
+      \begin{itemize}
+        \item logistic regression: 52.3\%
+        \item linear regression: 52.17\%
+        \item PageRank linear regression classifier: 51.3\%
+        \item CART: 52.79\% [FIX ME!]
     \end{itemize}
 
 \end{frame}
@@ -406,26 +401,33 @@ $logit(\mathbb{P})=X\beta$
         \item Quantitative metadata: not informative
         \item Comments: 
         	\begin{itemize}
-	   \item Logistic Regression with Bayes Classifier
-	   \item Logistic Regression with LogOdds
+	   \item heavy cleanup---must look at data by hand to understand problems
+	   \item many comments irrelevant
+	   \item many foreign-language comments
+	   \item text-speak and emoticons matter
+	   \item treat comments as bags of bags of words
+	   \item derive features from the bags
+	   \item logistic regression
+	   \item linear regression
+	   \item PageRank linear regression classifier
 	   \item CART
-	   \item PageRank
 	\end{itemize}
-       \item Results
-       \item Goal achieved?
+       \item Results not encouraging: problem is HARD
+       \item Humor very personal: lots of disagreement among voters
+       \item Even the order of presentation matters
+       \item Grouping/modeling individual voters might help, a la Netflix. \\
+                No rater information available in this dataset.
     \end{itemize}
 
 \end{frame}
 
-%----------------------------------------------------------------------------------
-\begin{frame}
-\frametitle{Improvements}
-   \begin{itemize}
-      \item Make better use of GitHub
-      \item Having data that are of higher quality
-      \item Incorporate personal preference in the dataset 
-   \end{itemize}
-\end{frame}
+%%----------------------------------------------------------------------------------
+%\begin{frame}
+%\frametitle{Improvements}
+%   \begin{itemize}
+%      \item Make better use of GitHub
+%   \end{itemize}
+%\end{frame}
 
 %----------------------------------------------------------------------------------
 \begin{frame}

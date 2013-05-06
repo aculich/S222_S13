@@ -1,0 +1,442 @@
+% last edited 5/5/2013 10:55 by PBS
+% -*-Mode: LaTeX;-*-
+
+%\documentclass[fleqn,handout]{beamer}
+\documentclass[fleqn]{beamer}
+\mode<presentation>
+{
+ \usetheme{CambridgeUS} % clean!
+ % \usecolortheme{orchid}
+  \usecolortheme{dolphin}
+\setbeamercolor{block title}{use=structure,fg=white,bg=blue!60!black}
+\setbeamercolor{block body}{use=structure,fg=black,bg=blue!7!white}
+%\usetheme{Goettingen}
+% \usetheme{Pittsburgh} % simple, but right flush titles
+% \usetheme{Copenhagen}
+%  \usetheme{PaloAlto}
+%  \usetheme{Rochester} % very simple, no headings
+ % \usetheme{Berkeley} % ugly square items
+  \setbeamercovered{transparent}  % or whatever (possibly just delete it)
+}
+\useinnertheme{rectangles}
+%\setbeamertemplate{caption}[numbered]
+\setbeamerfont{caption}{size=\tiny}
+\setbeamertemplate{footline}{%
+\leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=\paperwidth,ht=2.25ex,dp=1ex,left]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\hspace*{1em}Department of Statistics, University of California, Berkeley
+  \end{beamercolorbox}}%
+\vskip0pt}
+% If you wish to uncover everything in a step-wise fashion, uncomment
+% the following command:
+
+%\beamerdefaultoverlayspecification{<+->}
+\usepackage{amsmath}
+\usepackage{comment}
+%\usepackage{caption}
+\usepackage{multirow}
+\usepackage{url}
+
+\parskip 0.66ex
+
+
+\begin{document}
+
+\title[] % (optional, use only with long paper titles)
+{Predicting YouTube Comedy Slam Winners}
+
+%\author[Author, Another] % (optional, use only with lots of authors)
+\author{STAT 222 Class 2013}
+\institute{{\small Department of Statistics \\University of California, Berkeley}}
+
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+%\author[Author, Another] % (optional, use only with lots of authors)
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+% \date % [Short Occasion] % (optional)
+\date{7 May 2013 }
+\subject{Statistical Machine Learning}
+
+
+\begin{frame}
+
+\titlepage
+
+
+\end{frame}
+
+%\begin{frame}
+%\frametitle{Outline}
+%{\small
+%\tableofcontents
+%}
+% %  % You might wish to add the option [pausesections]
+%\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{YouTube Comedy Slam Data}
+
+	\begin{itemize}
+	   \item from UCI ML Repository; donated by Google employee
+	   \item a trial is an ordered pair of video IDs $(v_i, v_j)$
+	   \item data: $(v_i, v_j)$ $+$``left'' or ``right'' found funnier by viewer
+	   \item order of the pair in each trial was random
+	   \item repository has training data and test data
+	   \item YouTube has metadata about videos
+	   \item no data about viewers
+	\end{itemize}
+
+	\begin{beamerboxesrounded}{Goal}
+	\begin{center}
+	    Predict which video in a pair will be funnier, from metadata
+         \end{center}
+         \begin{center}
+         \small{(Not OK to use video IDs as features.)}
+         \end{center}
+	\end{beamerboxesrounded}
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Tools}
+   \begin{itemize}
+        \item Github
+        \item IPython notebook
+        \item numpy, scipy, matplotlib, nltk, scikit-learn
+   \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+ \begin{frame}
+\frametitle{Descriptive statistics of training data}
+      \begin{itemize}
+         \item 912,969 records
+         \item 18,474 distinct video IDs
+         \item 267,211 distinct video ID pairs
+         \item 359,874 distinct ordered pairs of video IDs
+         \item right video won 51.8\% of the time. $P$-value: nil
+         \item judgments often discordant: 
+                  '-iuk0PbfaHY wDx28Y2RcCI' \\
+                  left and right each ``funnier'' 119~times
+         \item accuracy of ideal (Bayes) classifier for training data: 73.4\% \\
+                  \#correct/\#cases (includes videos with no comments)
+         \item if order is ignored,  accuracy of ideal classifier drops to 65\%
+     \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{PageRank}
+      \begin{itemize}
+         \item for individual videos, directed graph of ``funnier than''
+         \item can summarize that graph by PageRank
+         \item PageRank algorithm: \\
+               Assign each video ID (graph node) a value
+                between $0$ to $1$, known as its \textsl{PageRank}.
+         \begin{center}
+         \begin{tabular}{| l |}
+         \hline
+         At $t=0$, $PR(p_{i};0) = \frac{1}{N}$, $N$ is the total number of nodes. \\ \hline
+         $PR(p_{i};t+1) = \frac{1-d}{N} + d \sum_{p_{j} \in M(p_{i})} \frac{PR(p_{j};t)}{L(p_{j})}$ \\ \hline
+         Stop when $|PR(t+1) - PR(t)| \le \epsilon$ \\ \hline
+         $d$ is a damping factor, default $0.85$ in scikit-learn. \\
+         \hline
+         \end{tabular}
+         \end{center}
+         \item Amounts to using the power method to estimate the principal 
+                  eigenvector of incidence matrix of the directed graph
+     \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Prediction using metadata: Feature selection}
+      \begin{itemize}
+      	\item Acquired metadata: queried YouTube with video IDs using Google APIs in Python\\
+	         nontrivial: required throttling the requests
+          \item Mutual information: \\
+          		\begin{center}
+        			\begin{tabular}{ | l | l |}
+			\hline
+			Variable & Mutual Info (bits) \\ \hline
+			average rating & 0.00227\\ \hline
+			number of views & 0.00431\\ \hline
+			number of votes & 0.00468\\ \hline
+			views per day & 0.00382 \\
+			\hline
+			\end{tabular}
+
+      		\end{center}	
+          \item Logistic regression using log(average rating), \# views, \# votes
+                   had negligible ``lift''
+          \item Comments more promising
+      \end{itemize}
+
+\end{frame}
+
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Comments: complications and cleaning}
+    \begin{itemize}
+   	\item Data Encoding: re-encoded comments in ASCII; omit garbled words
+        \item Inconsistent Spellings 
+        	\begin{itemize}
+		\item Spelling: tried Norvig's spelling corrector, ported to AWS. \\
+		(e.g.: ``speling"  $\rightarrow$ ``spelling")\\
+                Not accurate on this corpus\\
+                  (e.g.: ``youtube'' $\rightarrow$ ``couture'', 
+                    ``lol'' $\rightarrow$ ``ll'', ``haha'' $\rightarrow$ ``hata'')
+                   \item Text-speak:  used RegExp to standardize words\\
+		\begin{center}
+        			\begin{tabular}{ | l | l |}
+			\hline
+			Pattern & standard \\ \hline
+			lol, lolll, llol, lollololl & lol \\ \hline
+			ha, hahahh, ahaha, jhajha & ha \\
+			\hline
+			\end{tabular}
+
+      		\end{center}
+		\item Emoticons: used RegExps to replace happy faces (e.g., ``:-]'') with 
+                ``happyface'' 
+                  before stripping other punctuation
+	\end{itemize}
+                \item Stemmed with nltk PorterStemmer; removed ``stopwords''
+                \item Most frequent words: like, love, lol, funni, video
+    \end{itemize}
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Bags of Bags of Words}
+      \begin{itemize}
+         \item ordered pair of videos reduced to two ``bags of bags of words''  \\
+                  each comment is a bag, each video has a bag of bags
+
+         \item features derived from bags of bags:
+             \begin{itemize}
+                 \item presence of a word in any comment for video ID
+                 \item (relative) frequency of comments that contain a given word
+                 \item  logOdds of frequencies and relative frequencies
+              \end{itemize}
+         
+         \item derived feature: PageRank predicted by linear regression\\ 
+                  using (among other things) $\arctan$(difference in LOL counts)/$({\pi}/2)$
+     
+     \end{itemize}
+\end{frame}
+
+
+
+%%----------------------------------------------------------------------------------
+%\begin{frame}
+%\frametitle{Models}
+%
+%     \begin{beamerboxesrounded}{Logistic regression with Log Bayes Factor}
+%         Binary Output (Left v.s. Right) as response variable\\
+%         log Bayes factor of the two ordered ids and a constant term as features
+%     \end{beamerboxesrounded}
+%
+%     \begin{beamerboxesrounded}{Logistic regression Wenchang}
+%         Explain
+%     \end{beamerboxesrounded}
+%
+%     \begin{beamerboxesrounded}{CART}
+%         Explain
+%      \end{beamerboxesrounded}
+%     
+%      \begin{beamerboxesrounded}{Page Rank}
+%         Binary Ouput and "LOL" Count as link's weight indicators\\
+%         Each node represents a video, if a video A is funnier than B, than a directed link
+%         with weight = \#\;of\;A\;funnier\;than\;B + arctan (\# of lol(A-B))/$({\pi}/2)$\\
+%         (Implemented arctan to shrink an integer to $(0,1)$, small modification)
+%     \end{beamerboxesrounded}
+%
+%\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Logistic Regression: log Bayes factor as feature}	
+
+      \begin{enumerate}\vspace{2mm}
+      \item determine whether video $v_i$ won more than it lost, or vice versa.\\
+               if $v_i$ won more than lost, it's a ``winner''\\
+               if $v_i$ lost more than won, it's a``loser''
+               \vspace{2mm}
+      \item for each word $w$ in comment of ``significant'' winner/loser, find: \\
+              $\mathbb{P}_1(\mathnormal{w})$ 
+             = percentage of winner comments that contain $w$\\
+             $\mathbb{P}_0(\mathnormal{w})$ = 
+               percentage of loser comments that contain $w$\\
+               (pad to avoid zeros)\\
+               \vspace{2mm}
+      \item derive new feature: \\      
+$logOdds(v) =\sum_{\mathnormal{w}} \mathnormal{m_w}\log(\frac{\mathbb{P}_1(\mathnormal{w})}{\mathbb{P}_0(\mathnormal{w})}) + (\mathnormal{n-m_w})\log(\frac{1-\mathbb{P}_1(\mathnormal{w})}{1-\mathbb{P}_0(\mathnormal{w})})$\vspace{3mm}
+
+$\mathnormal{n}$: \#comments on video $v$\\
+$\mathnormal{m_w}$: \#comments on video $v$ containing $\mathnormal{w}.$  \vspace{3mm}
+%\end{equation}
+      \end{enumerate}
+
+\end{frame}
+
+%---------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Logistic Regression with Log Bayes Factors}
+\begin{center}
+$logit(\mathbb{P})=X\beta$
+\end{center}
+    \begin{itemize}
+        \item $\mathbb{P}$\ = \ Probability that the right video is funnier
+       \item   \[ X = \left( \begin{array} {ccc}
+		     1 & B(v_{11}) & B(v_{12})\\
+		      \vdots & \ddots & \vdots \\
+		      1 & B(v_{n1}) & B(v_{n1})
+		     \end{array} \right)
+	 	 \]
+       
+
+    \end{itemize}
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Linear regression}
+    \begin{itemize}
+     \item Model: high frequency words (in $\geq$ 1500 comments) as features\\
+     $$Logit\ Y = \beta_0 + \beta_1 x_1 + ... + \beta_m x_m = \beta^T X$$
+     \item $Logit\ Y$: log odds for ID pair, $log(\frac{\#\ left\ funnier}{\#\ right\ funnier})$
+     \item $x_i$:  difference in \#comments containing $w_i$ for 
+              $v_{\mbox{left}}$ and $v_{\mbox{right}}$
+     \item Dimension of $X$: 359,874 $\times$ 3,392
+     \item Build $X$ in $B$ blocks of 20,000 rows; save all the blocks to disk.   \\
+     $$X^TX = \sum_{b=1}^B X_b^TX_b$$
+     $$X^TY = \sum_{b=1}^B X_b^TY_b$$
+  \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{PageRank Linear regression classifier}
+    \begin{itemize}
+     \item Predict continuous PageRank of video IDs from word frequencies by linear regression
+     \item Classify pair as ``right'' if predicted PageRank of right video is higher than left
+     \item Classify pair as ``left'' if predicted PageRank of left video is higher than right
+   \end{itemize}
+\end{frame}
+
+%---------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{CART}
+    \begin{itemize}
+     \item Features: high frequency words
+     \item Model
+     $$f(x) = \sum_{k=1}^K c_k I_{x \in R_k}$$
+     \item $\{R_k\}_{k=1}^K$: partition of feature space. 
+     \item $c_k \in \{0, 1\}$.
+     \item How to find region $R_k$?
+    \end{itemize}
+\end{frame}
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{CART--FIX ME!}
+  \begin{itemize}
+   \item Greedy algorithm to find partitions
+   $$R_1(j, s) = \{X|x_j \leq s\}\ and\ R_2(j, s) = \{X|x_j \ > s\}$$
+   Seek the splitting variable $j$ and split point $s$ by solving
+   $$\min_{j,s} [\min_{c_1} \sum_{x_i \in R_1(j, s)} (y_i - c_1)^2 + \min_{c_2} 
+   \sum_{x_i \in R_2(j, s)} (y_i - c_2)^2]$$
+   Inner minimization is solved by
+   $$\hat{c}_1 = ave(y_i| x_i \in R_1(j,s)),\ \hat{c}_2 = ave(y_i|x_i \in R_2(j,s))$$
+   Scan through all of the inputs to determinate the best pair $(j, s)$. 
+   Repeat the splitting process on each of the two regions.
+  \item Python package: $mlpy$.
+  \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Test data}
+    \begin{itemize}
+        \item 225,593 records
+        \item 75,447 distinct ordered pairs of videos
+        \item right video won 51.6\% of the time
+        \item Accuracy of ideal (Bayes) classifier: 69.5\% 
+        \item Accuracy of Bayes classifier w/o order info: 65\%
+    \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Performance on test data: only count pairs with comments}
+\begin{beamerboxesrounded}{}
+	\begin{center}
+	 score=$\frac{Number \indent of \indent Correct \indent Prediction}{Number \indent of \indent Predictable \indent Pairs}$
+         \end{center}
+	\end{beamerboxesrounded}
+      \begin{itemize}
+        \item logistic regression: 52.3\%
+        \item linear regression: 52.17\%
+        \item PageRank linear regression classifier: 51.3\%
+        \item CART: 52.79\% [FIX ME!]
+    \end{itemize}
+
+\end{frame}
+
+%----------------------------------------------------------------------------------
+ %----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Conclusions}
+    \begin{itemize}
+        \item Quantitative metadata: not informative
+        \item Comments: 
+        	\begin{itemize}
+	   \item heavy cleanup---must look at data by hand to understand problems
+	   \item many comments irrelevant
+	   \item many foreign-language comments
+	   \item text-speak and emoticons matter
+	   \item treat comments as bags of bags of words
+	   \item derive features from the bags
+	   \item logistic regression
+	   \item linear regression
+	   \item PageRank linear regression classifier
+	   \item CART
+	\end{itemize}
+       \item Results not encouraging: problem is HARD
+       \item Humor very personal: lots of disagreement among voters
+       \item Even the order of presentation matters
+       \item Grouping/modeling individual voters might help, a la Netflix. \\
+                No rater information available in this dataset.
+    \end{itemize}
+
+\end{frame}
+
+%%----------------------------------------------------------------------------------
+%\begin{frame}
+%\frametitle{Improvements}
+%   \begin{itemize}
+%      \item Make better use of GitHub
+%   \end{itemize}
+%\end{frame}
+
+%----------------------------------------------------------------------------------
+\begin{frame}
+\frametitle{Acknowledgement}
+\begin{center}
+Thanks to Philip, David and Aaron\\
+for the valuable help!
+\end{center}
+   
+\end{frame}
+\end{document}
+ 

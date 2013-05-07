@@ -347,15 +347,14 @@ $logit(\mathbb{P})=X\beta$
 \end{frame}
 %----------------------------------------------------------------------------------
 \begin{frame}
-\frametitle{CART--FIX ME!}
+\frametitle{CART}
   \begin{itemize}
    \item Greedy algorithm to find partitions
    $$R_1(j, s) = \{X|x_j \leq s\}\ and\ R_2(j, s) = \{X|x_j \ > s\}$$
    Seek the splitting variable $j$ and split point $s$ by solving
    $$\min_{j,s} [\min_{c_1} \sum_{x_i \in R_1(j, s)} (y_i - c_1)^2 + \min_{c_2} 
    \sum_{x_i \in R_2(j, s)} (y_i - c_2)^2]$$
-   Inner minimization is solved by
-   $$\hat{c}_1 = ave(y_i| x_i \in R_1(j,s)),\ \hat{c}_2 = ave(y_i|x_i \in R_2(j,s))$$
+   Inner minimization is solved by $0$ or $1$, which minimize inner part. 
    Scan through all of the inputs to determinate the best pair $(j, s)$. 
    Repeat the splitting process on each of the two regions.
   \item Python package: $mlpy$.
@@ -386,9 +385,9 @@ $logit(\mathbb{P})=X\beta$
 	\end{beamerboxesrounded}
       \begin{itemize}
         \item logistic regression: 52.3\%
-        \item linear regression: 52.17\%
+        \item linear regression: 52.2\%
         \item PageRank linear regression classifier: 51.3\%
-        \item CART: 52.79\% [FIX ME!]
+        \item CART: 52.4\% 
     \end{itemize}
 
 \end{frame}
